@@ -6,7 +6,7 @@ $(document).ready(function () {
         $('#formEmpleado').fadeIn();
         $('#tablaEmpleados').fadeOut();
         
-        $('#tituloFormEmpleado').html('Registrar un empleado');
+        $('#tituloFormEmpleado').html('Agregar empleado');
         $('#formEmpleado')[0].reset();
         $('#inputIdEmpleado').val(0);
     });
@@ -23,63 +23,22 @@ $(document).ready(function () {
     //para el boton de modificar
     $(document).on('click','.btnModificarEmpleado',function(){
         var botonModificar = $(this);
-        $('#contenedorFormEmpleado').fadeIn();
+        $('#formEmpleado').fadeIn();
         $('#tablaEmpleados').fadeOut();
-        //llamar la funcion del js de catalogo -> obtener estado
-        //Catalogos.obtener_catalogo_estado();
+       
         $('#tituloFormEmpleado').html('Modificar empleado');
         var empleado = JSON.parse(atob(botonModificar.data('str_empleado_obj')));
-        $('#inputIdEmpleado').val(empleado.id);
-        $('#inputClave').val(empleado.clave);
-        $('#inputNombre').val(empleado.nombres);
-        $('#inputPaterno').val(empleado.apellido_paterno);
-        $('#inputMaterno').val(empleado.apellido_materno);
-        $('#inputDireccion').val(empleado.direccion);
-        $('#sltInputEstado').val(empleado.catalogo_estado_id);
-    });
 
-    //para abrir la modal
-    $(document).on('click','.btnAgregarDatosContacto',function (){
-        var botonModificar = $(this);
-        $('#tbodyDatosContactoEmpleado').html('');
-        var id_empleado = botonModificar.data('id_empleado');
-
-        var nombre_empleado = botonModificar.data('nombre_empleado');
-        var datosContacto = JSON.parse(atob(botonModificar.data('datos_contacto')));
-        var html = '';
-        datosContacto.forEach(function(item) {
-            html = '<tr>' +
-            '<td>' +
-            '<select class="form-select slt_cat_contacto" id="slt_contacto_'+id_empleado+'_'+item.id+'">' +
-                Catalogos.html_catalogo_contacto +
-            '</select>' +
-            '</td>' +
-            '<td><input type="text" class="form-control" id="slt_input_contacto'+id_empleado+'_'+item.id+'" placeholder="Dato de contacto"></td>' +
-            '<td>' +
-                '<button type="button" class="btn btn-danger">eliminar</button>' +
-            '</td>' +
-        '</tr>';
-        $('#tbodyDatosContactoEmpleado').append(html);
-        $('#slt_contacto_'+id_empleado+'_'+item.id).val(item.catalogo_contacto_id);
-        $('#slt_input_contacto'+id_empleado+'_'+item.id).val(item.dato_contacto);
-        });
-        $('#nombreEmpleado').html(nombre_empleado);
-        //alert(nombre_empleado);
-    });
-
-    $(document).on('click','#agregarDatoContacto',function (){
-        var html = '<tr>' +
-                '<td>' +
-                '<select class="form-select slt_cat_contacto">' +
-                    Catalogos.html_catalogo_contacto +
-                '</select>' +
-                '</td>' +
-                '<td><input type="text" class="form-control" placeholder="Dato de contacto"></td>' +
-                '<td>' +
-                    '<button type="button" class="btn btn-danger">eliminar</button>' +
-                '</td>' +
-            '</tr>';
-        $('#tbodyDatosContactoEmpleado').append(html);
+        $('#inputIdEmpleado').val(empleado.id_empleado);
+        $('#inputClave').val(empleado.clave_empleado);
+        $('#inputNombre').val(empleado.nombre);
+        $('#inputEdad').val(empleado.edad);
+        $('#inputFecha').val(empleado.fecha_nacimiento);
+        $('#inputGenero').val(empleado.genero);
+        $('#inputSueldo').val(empleado.sueldo_base);
+        $('#inputActivoInactivo').val(empleado.activo);
+       /*  $('#inputPuesto').val(empleado.puesto);
+        $('#inputExperiencia').val(empleado.experiencia_profesional); */
     });
 
 
@@ -128,6 +87,7 @@ var Empleados = {
                                 '<td>'+empleado.nombre+'</td>' +
                                 '<td>'+empleado.edad+'</td>' +
                                 '<td>'+empleado.fecha_nacimiento+'</td>' +
+                                '<td>'+(empleado.activo === 1 ? 'Activo' : 'Inactivo') +'</td>' +
                                 /* '<td>'+
                                     '<button type="button" class="btn btn-secondary btnAgregarDatosContacto" ' +
                                     'data-bs-toggle="modal" data-bs-target="#modalFormDatosContacto"' +
@@ -146,10 +106,7 @@ var Empleados = {
                     $('#listaEmpleados').html(html_registros_empleados);
                 }
             },error : function (err){
-                Swal.fire({
-                    title: "Error en la petición de empleados",
-                    icon: "error"
-                });
+                Empleados.alertaError("Error en la petición de empleados")
             }
         });
     },

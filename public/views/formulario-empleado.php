@@ -1,11 +1,12 @@
 <div id="formEmpleado" class="container is-max-desktop" style="margin-top: 80px; display: none;">
     <div class="notification is-link">
-        <strong>Agregar Empleado</strong>
+        <strong id="tituloFormEmpleado"></strong>
     </div>
     <div class="card">
         <div class="card-content">
             <div class="content">
                 <form id="formEmpleado" method="post">
+                    <input type="hidden" id="inputIdEmpleado" name="id" value="0">
                     <div class="field">
                         <label class="label">Clave</label>
                         <div class="control">
@@ -41,6 +42,17 @@
                                 <select id="inputGenero" name="genero">
                                     <option>Hombre</option>
                                     <option>Mujer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Genero activo</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="inputGenero" name="genero">
+                                    <option value="true">Activo</option>
+                                    <option value="false">Inactivo</option>
                                 </select>
                             </div>
                         </div>

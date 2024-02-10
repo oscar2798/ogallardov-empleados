@@ -65,12 +65,32 @@ class EmpleadosController {
     }
 
     public function eliminarEmpleado($empleado) {
-
-        $empleadoModel = new EmpleadoModel();
-        $eliminar = $empleadoModel->eliminarRegistro($empleado);
-        
-        $respuesta = 0;
-        return $eliminar;
+        try {
+            $empleadoModel = new EmpleadoModel();
+            $eliminar = $empleadoModel->eliminarRegistro($empleado);
+            if($eliminar){
+                $respuesta = array(
+                    'success' => true,
+                    'msg' => array(
+                        'Se eliminó el empleado correctamente'
+                    )
+                );
+            }else{
+                $respuesta = array(
+                    'success' => false,
+                    'msg' => 'No se pudo eliminar el empleado'
+                );
+            }
+        } catch (Exception $ex){
+            $respuesta = array(
+                'success' => false,
+                'msg' => array(
+                    'Ocurrio un error en el servidor, intentar mas tarde',
+                    $ex->getMessage()
+                )
+            );
+        }
+        return $respuesta;
     }
 
 }

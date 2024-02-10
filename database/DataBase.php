@@ -11,8 +11,7 @@ class DataBase {
     }
 
     public function ejecutarConsulta($consulta) {
-        $sql = $this->conexionDB->prepare($consulta);
-        $sql->execute();
+        $sql = $this->conexionDB->query($consulta);
         return $sql;
     }
 
@@ -22,7 +21,7 @@ class DataBase {
 
         $sql = $this->ejecutarConsulta($consulta);
 
-        $resultSql = $sql->get_result()->fetch_all(MYSQLI_ASSOC);
+        $resultSql = $sql->fetch_all(MYSQLI_ASSOC);
 
         return $resultSql;
     }
@@ -39,12 +38,10 @@ class DataBase {
 
         $consulta = "UPDATE $tabla"." SET id_empleado='".$id."', clave_empleado='".$clave."', nombre='".$name."', edad=".$edad.
         ", fecha_nacimiento='".$fecha."', genero='".$genero."', sueldo_base=".$sueldo.", activo=false WHERE id_empleado=".$id;
-        echo $consulta;
+        
         $sql = $this->ejecutarConsulta($consulta);
 
-        echo json_encode($sql);
-
-        
+        return $sql;
     }
     
 }
