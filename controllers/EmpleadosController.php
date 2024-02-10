@@ -1,73 +1,113 @@
 <?php 
 
 include_once("../models/EmpleadoModel.php");
-
+include_once("../models/DetalleEmpleadoModel.php");
+include_once("../helper/validarFormulario.php");
 class EmpleadosController {
 
     public function obtenerEmpleados() {
         $empleadoModel = new EmpleadoModel();
         $listaEmpleados = $empleadoModel->obtenerRegistros();
 
+        foreach ($listaEmpleados as $key => $empleado) {
+            $detalleEmpleadoModel = new DetalleEmpleadoModel($empleado['id_empleado']);
+            $detalleEmpleado = $detalleEmpleadoModel->obtenerDetalleEmpleadoById();
+            $empleado['detalle'] = $detalleEmpleado;
+            $empleadoCompleto[$key] = $empleado;
+        }
+
         $respuesta = array(
             'success' => true,
             'data' => array(
-                'empleados' => $listaEmpleados
+                'empleados' => $empleadoCompleto
             )
         );
         return $respuesta;
     }
 
     public function guardarEmpleado($paramsForm) {
+        try{
+            
+            $validacion = ValidarFormulario::validarFormEmpleado($paramsForm);
 
-       /*  if(isset($paramsForm['id']) && !empty($paramsForm['id'])){
-            $empleadoModel = new EmpleadoModel();
-            $guardar = $empleadoModel->actualizarRegistro($paramsForm,array('id' => $paramsForm['id']));
-
-            if($guardar){
-                $respuesta = array(
-                    'success' => true,
-                    'msg' => array(
-                        'Se actualizo el empleado correctamente'
-                    )
-                );
-            }else{
-                $respuesta = array(
-                    'success' => false,
-                    'msg' => $empleadoModel->getMsgErrors()
-                );
-                $respuesta['msg'][] = 'No pude actualizar el empleado';
+            foreach ($paramsForm as $columna => $value) {
+                if ($columna !== 'puesto' && $columna !== 'experiencia_profesional') {
+                    $datosFormTableEmpleado[$columna] = $value; 
+                } else {
+                    $datosFormTableDetalleEmpleado[$columna] = $value;
+                }
             }
-        }else{
 
-            $empleadoModel = new EmpleadoModel();
-            $datosFormulario['id'] = 0;
-            $guardo = $empleadoModel->insertar($datosFormulario);
+            if($validacion['status']){
+                if(isset($paramsForm['id_empleado']) && !empty($paramsForm['id_empleado'])){
+                    $empleadoModel = new EmpleadoModel();
+                    
+                    $guardar = $empleadoModel->actualizarRegistro($datosFormTableEmpleado);
 
-            if($guardo){
-                $respuesta = array(
-                    'success' => true,
-                    'data' => array(
-                        'id_empleado' => $empleadoModel->ultimoIdInsertado()
-                    ),
-                    'msg' => array(
-                        'Se registro el empleado correctamente'
-                    )
-                );
+                    if($guardar){
+                        $respuesta = array(
+                            'success' => true,
+                            'msg' => array(
+                                'Se actualizó el empleado correctamente'
+                            )
+                        );
+                    }else{
+                        $respuesta = array(
+                            'success' => false,
+                            'msg' => 'No se pudo actualizar el empleado'
+                        );
+                    }
+                }else{
+                    $empleadoModel = new EmpleadoModel();
+                    
+                    $guardoEmpleado = $empleadoModel->agregarRegistro($datosFormTableEmpleado);
+
+                    if($guardoEmpleado){
+                        $empleadoDetalleModel = new DetalleEmpleadoModel();
+
+                        $datosFormTableDetalleEmpleado['empleado_id'] = $empleadoModel->ultimoIdInsertado();
+                        $guardoDetalle = $empleadoDetalleModel->agregarRegistro($datosFormTableDetalleEmpleado);
+
+                        if($guardoDetalle){
+                            $respuesta = array(
+                                'success' => true,
+                                'data' => array(
+                                    'id_empleado' => $empleadoModel->ultimoIdInsertado()
+                                ),
+                                'msg' => array(
+                                    'Se registro el empleado correctamente'
+                                )
+                            );
+                        }
+                        
+                    }else{
+                        $respuesta = array(
+                            'success' => false,
+                            'msg' => 'No se pudo registrar el empleado correctamente',
+                        );
+                    }
+                }
             }else{
-                $respuesta = array(
-                    'success' => false,
-                    'msg' => $empleadoModel->getMsgErrors(),
-                );
+                $respuesta['success'] = false;
+                $respuesta['msg'] = $validacion['msg'];
             }
+        }catch (Exception $ex){
+            $respuesta = array(
+                'success' => false,
+                'msg' => array(
+                    'Ocurrio un error en el servidor, intentelo más tarde',
+                    ''. $guardoDetalle,
+                    $ex->getMessage()
+                )
+            );
         }
-
-        return $respuesta; */
+        return $respuesta;
     }
 
-    public function eliminarEmpleado($empleado) {
+    public function eliminarEmpleado($idEmpleado) {
         try {
             $empleadoModel = new EmpleadoModel();
-            $eliminar = $empleadoModel->eliminarRegistro($empleado);
+            $eliminar = $empleadoModel->eliminarRegistro($idEmpleado);
             if($eliminar){
                 $respuesta = array(
                     'success' => true,

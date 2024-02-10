@@ -13,6 +13,7 @@
     <div class="container">
         <?php include_once("./views/tabla-empleados.php"); ?>
         <?php include_once("./views/formulario-empleado.php"); ?>
+        <?php include_once("./views/detalle-empleado.php"); ?>
     </div>
 
     <script src="assets/jquery-3.6.0.min.js"></script>

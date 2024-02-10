@@ -3,7 +3,7 @@ var host_backend = 'http://localhost/ogallardov/routes/rutas.php?';
 $(document).ready(function () {
 
     $(document).on('click','#btnAgregarEmpleado',function(){
-        $('#formEmpleado').fadeIn();
+        $('#contenedorFormEmpleado').fadeIn();
         $('#tablaEmpleados').fadeOut();
         
         $('#tituloFormEmpleado').html('Agregar empleado');
@@ -20,10 +20,33 @@ $(document).ready(function () {
         $('#tablaEmpleados').fadeIn();
     });
 
-    //para el boton de modificar
+    $(document).on('click','#btnRegresar',function(){
+        $('#contenedorDetalleEmpleado').fadeOut();
+        $('#tablaEmpleados').fadeIn();
+    });
+
+    $(document).on('click','.btnVerDetalleEmpleado',function (){
+        var botonDetalle = $(this);
+        $('#contenedorDetalleEmpleado').fadeIn();
+        $('#tablaEmpleados').fadeOut();
+        
+        var empleado = JSON.parse(atob(botonDetalle.data('str_empleado_obj')));
+    
+        $('#inputDetalleClave').val(empleado.clave_empleado);
+        $('#inputDetalleNombre').val(empleado.nombre);
+        $('#inputDetalleEdad').val(empleado.edad);
+        $('#inputDetalleFecha').val(empleado.fecha_nacimiento);
+        $('#inputDetalleGenero').val(empleado.genero);
+        $('#inputDetalleSueldo').val(empleado.sueldo_base);
+        $('#inputDetalleActivoInactivo').val((empleado.activo == 1 ? 'Activo' : 'Inactivo'));
+        $('#inputDetallePuesto').val(empleado.detalle.puesto);
+        $('#inputDetalleExperiencia').val(empleado.detalle.experiencia_profesional);
+
+    });
+
     $(document).on('click','.btnModificarEmpleado',function(){
         var botonModificar = $(this);
-        $('#formEmpleado').fadeIn();
+        $('#contenedorFormEmpleado').fadeIn();
         $('#tablaEmpleados').fadeOut();
        
         $('#tituloFormEmpleado').html('Modificar empleado');
@@ -37,14 +60,13 @@ $(document).ready(function () {
         $('#inputGenero').val(empleado.genero);
         $('#inputSueldo').val(empleado.sueldo_base);
         $('#inputActivoInactivo').val(empleado.activo);
-       /*  $('#inputPuesto').val(empleado.puesto);
-        $('#inputExperiencia').val(empleado.experiencia_profesional); */
+        $('#inputPuesto').val(empleado.detalle.puesto);
+        $('#inputExperiencia').val(empleado.detalle.experiencia_profesional);
     });
-
 
     $(document).on('click','.btnEliminarEmpleado',function(){
         var botonEliminar = $(this);
-        var empleado = JSON.parse(atob(botonEliminar.data('str_empleado_id')));
+        var idEmpleado = botonEliminar.data('id_empleado_eliminar');
 
         Swal.fire({
             title: '¡Espera!',
@@ -57,7 +79,7 @@ $(document).ready(function () {
             cancelButtonText: 'No, cancelar!',
           }).then((result) => {
             if (result.isConfirmed) {
-                Empleados.eliminarEmpleado(empleado);
+                Empleados.eliminarEmpleado(idEmpleado);
             }
           })
     });
@@ -76,30 +98,29 @@ var Empleados = {
             data : {},
             dataType : 'json',
             success : function (respuestaAjax){
-                console.log(respuestaAjax);
                 if(respuestaAjax.success) {
                     var html_registros_empleados = '';
                     respuestaAjax.data.empleados.forEach(function(empleado){
                         var strEmpleadoObj = btoa(JSON.stringify(empleado));
-                        
+
                         html_registros_empleados += '<tr>' +
                                 '<td>'+empleado.clave_empleado+'</td>' +
                                 '<td>'+empleado.nombre+'</td>' +
                                 '<td>'+empleado.edad+'</td>' +
                                 '<td>'+empleado.fecha_nacimiento+'</td>' +
-                                '<td>'+(empleado.activo === 1 ? 'Activo' : 'Inactivo') +'</td>' +
-                                /* '<td>'+
-                                    '<button type="button" class="btn btn-secondary btnAgregarDatosContacto" ' +
-                                    'data-bs-toggle="modal" data-bs-target="#modalFormDatosContacto"' +
-                                    'data-id_empleado="'+empleado.id+'" data-nombre_empleado="'
-                                    +empleado.nombres+'">Visualizar datos</button>'+
-                                '</td>' + */
+                                '<td>'+(empleado.activo == true ? 'Activo' : 'Inactivo') +'</td>' +
+                                '<td>'+
+                                    '<button class="button is-info js-modal-trigger btnVerDetalleEmpleado" ' +
+                                    'data-str_empleado_obj="'+strEmpleadoObj+'">Ver</button>'+
+                                '</td>' +
                                 '<td>' +
                                     '<button data-str_empleado_obj="'+strEmpleadoObj+'"' +
                                         'class="button is-warning btnModificarEmpleado" style="margin-right: 10px;">Modificar</button>' +
-
+                                    (empleado.activo == 1 ?
                                     '<button data-id_empleado_eliminar="'+empleado.id_empleado+'" ' +
-                                    'class="button is-danger btnEliminarEmpleado" id="id_empleado_delete'+empleado.id_empleado+'" data-str_empleado_id="'+strEmpleadoObj+'">Eliminar</button>' +
+                                    'class="button is-danger btnEliminarEmpleado" id="id_empleado_delete'+empleado.id_empleado+'" '+
+                                    'data-str_empleado_id="'+strEmpleadoObj+'">Eliminar</button>' : 
+                                    '<button class="button is-danger" disabled>Eliminar</button>') +
                                 '</td>' +
                             '</tr>';
                     });
@@ -113,25 +134,25 @@ var Empleados = {
 
     guardarEmpleado : function(){
         $.ajax({
-            type : 'post', //tipo
+            type : 'POST',
             url : host_backend+'peticion=empleados&funcion=agregar-actualizar',
-            
             data : $('#formEmpleado').serialize(),
             dataType : 'json',
             success : function (respuestaAjax){
                 if(respuestaAjax.success) {
                     $('#contenedorFormEmpleado').fadeOut();
                     $('#tablaEmpleados').fadeIn();
-                    Empleados.listadoEmpleados();
+                    Empleados.listaEmpleados();
                 }else{
                     var html_mensajes = '';
                     respuestaAjax.msg.forEach(function(mensaje){
                         html_mensajes += '<li>'+mensaje+'</li>';
                     });
-                    $('#divMensajesSistema').html(html_mensajes).fadeIn();
-                    setTimeout(function(){
-                        $('#divMensajesSistema').html('').fadeOut();
-                    },10000);
+
+                    Swal.fire({
+                        html: html_mensajes,
+                        icon: "info"
+                    });
                 }
             },error : function (err){
                 Empleados.alertaError("Error en la petición de guardar empleado");
@@ -139,11 +160,11 @@ var Empleados = {
         });
     },
 
-    eliminarEmpleado: function(empleado) {
+    eliminarEmpleado: function(idEmpleado) {
         $.ajax({
             type : 'POST',
             url : host_backend+'peticion=empleados&funcion=eliminar',
-            data : empleado,
+            data : {idEmpleado: idEmpleado},
             dataType : 'json',
             success : function (respuestaAjax){
                 if(respuestaAjax.success) {

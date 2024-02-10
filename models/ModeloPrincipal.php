@@ -15,12 +15,12 @@ class ModeloPrincipal extends DataBase {
         return $registros;
     }
 
-    public function agregarRegistro() {
-
+    public function agregarRegistro($paramsForm) {
+        return $this->agregar($this->tabla, $paramsForm);
     }
 
-    public function actualizarRegistro() {
-
+    public function actualizarRegistro($paramsForm) {
+        return $this->actualizar($this->tabla, $paramsForm);
     }
 
     public function eliminarRegistro($empleado) {

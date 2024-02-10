@@ -1,4 +1,4 @@
-<div id="formEmpleado" class="container is-max-desktop" style="margin-top: 80px; display: none;">
+<div id="contenedorFormEmpleado" class="container is-max-desktop" style="margin-top: 80px; display: none;">
     <div class="notification is-link">
         <strong id="tituloFormEmpleado"></strong>
     </div>
@@ -6,25 +6,25 @@
         <div class="card-content">
             <div class="content">
                 <form id="formEmpleado" method="post">
-                    <input type="hidden" id="inputIdEmpleado" name="id" value="0">
+                    <input type="hidden" id="inputIdEmpleado" name="id_empleado">
                     <div class="field">
                         <label class="label">Clave</label>
                         <div class="control">
-                            <input class="input" type="text" id="inputClave" name="clave" placeholder="Text input">
+                            <input class="input" type="text" id="inputClave" name="clave_empleado">
                         </div>
                     </div>
 
                     <div class="field">
                         <label class="label">Nombre</label>
                         <div class="control">
-                            <input class="input" type="text" id="inputNombre" name="nombre" placeholder="Text input">
+                            <input class="input" type="text" id="inputNombre" name="nombre">
                         </div>
                     </div>
 
                     <div class="field">
                         <label class="label">Edad</label>
                         <div class="control">
-                            <input class="input" type="number" id="inputEdad" name="edad" placeholder="Text input">
+                            <input class="input" type="number" id="inputEdad" name="edad">
                         </div>
                     </div>
 
@@ -40,19 +40,22 @@
                         <div class="control">
                             <div class="select">
                                 <select id="inputGenero" name="genero">
+                                    <option value="">--Seleccionar--</option>
                                     <option>Hombre</option>
                                     <option>Mujer</option>
                                 </select>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="field">
-                        <label class="label">Genero activo</label>
+                        <label class="label">Activo/Inactivo</label>
                         <div class="control">
                             <div class="select">
-                                <select id="inputGenero" name="genero">
-                                    <option value="true">Activo</option>
-                                    <option value="false">Inactivo</option>
+                                <select id="inputActivoInactivo" name="activo">
+                                    <option value="">--Seleccionar--</option>
+                                    <option value="1">Activo</option>
+                                    <option value="0">Inactivo</option>
                                 </select>
                             </div>
                         </div>
@@ -81,10 +84,10 @@
 
                     <div class="field is-grouped">
                         <div class="control">
-                            <button id="btnGuardarEmpleado" class="button is-link">Registrar</button>
+                            <button type="button" id="btnGuardarEmpleado" class="button is-link">Registrar</button>
                         </div>
                         <div class="control">
-                            <button id="btnCancelarEmpleado" class="button is-link is-light">Cancelar</button>
+                            <button type="button" id="btnCancelarEmpleado" class="button is-link is-light">Cancelar</button>
                         </div>
                     </div>
                 </form>

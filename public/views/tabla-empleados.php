@@ -13,6 +13,7 @@
             <th>Edad</th>
             <th>Fecha de Nacimiento</th>
             <th>Activo/Inactivo</th>
+            <th>Detalle</th>
             <th>Acciones</th>
         </thead>
         <tbody id="listaEmpleados">
