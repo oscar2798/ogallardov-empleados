@@ -51,6 +51,12 @@
                     <textarea class="textarea" id="inputDetalleExperiencia" readonly></textarea>
                 </div>
 
+                <div>
+                    <canvas id="graficaPesos" width="400" height="400"></canvas>
+                </div>
+                <div>
+                    <canvas id="graficaDolares" width="400" height="400"></canvas>
+                </div>
                 <div class="field is-grouped">
 
                     <div class="control">

@@ -6,7 +6,7 @@
     <button id="btnAgregarEmpleado" class="button is-success">Agregar Empleado</button>
 
 
-    <table class="table is-bordered is-striped is-narrow mt-4">
+    <table class="table is-bordered is-striped is-narrow is-fullwidth mt-4">
         <thead>
             <th>Clave</th>
             <th>Nombre</th>

@@ -30,27 +30,31 @@ class EmpleadosController {
             
             $validacion = ValidarFormulario::validarFormEmpleado($paramsForm);
 
-            foreach ($paramsForm as $columna => $value) {
+             foreach ($paramsForm as $columna => $value) {
                 if ($columna !== 'puesto' && $columna !== 'experiencia_profesional') {
                     $datosFormTableEmpleado[$columna] = $value; 
                 } else {
                     $datosFormTableDetalleEmpleado[$columna] = $value;
                 }
             }
-
+            
             if($validacion['status']){
                 if(isset($paramsForm['id_empleado']) && !empty($paramsForm['id_empleado'])){
                     $empleadoModel = new EmpleadoModel();
-                    
-                    $guardar = $empleadoModel->actualizarRegistro($datosFormTableEmpleado);
+                    $actualizoEmpleado = $empleadoModel->actualizarRegistro($datosFormTableEmpleado);
 
-                    if($guardar){
-                        $respuesta = array(
-                            'success' => true,
-                            'msg' => array(
-                                'Se actualizó el empleado correctamente'
-                            )
-                        );
+                    if($actualizoEmpleado){
+                        $empleadoDetalleModel = new DetalleEmpleadoModel($paramsForm['id_empleado']);
+                        $actualizoDetalle = $empleadoDetalleModel->actalizarDetalleEmpleadoById($datosFormTableDetalleEmpleado);
+                        
+                        if($actualizoDetalle){
+                            $respuesta = array(
+                                'success' => true,
+                                'msg' => array(
+                                    'Se actualizó el empleado correctamente'
+                                )
+                            );
+                        }
                     }else{
                         $respuesta = array(
                             'success' => false,
@@ -59,7 +63,7 @@ class EmpleadosController {
                     }
                 }else{
                     $empleadoModel = new EmpleadoModel();
-                    
+                    $datosFormTableEmpleado["activo"] = 1;
                     $guardoEmpleado = $empleadoModel->agregarRegistro($datosFormTableEmpleado);
 
                     if($guardoEmpleado){
@@ -75,7 +79,7 @@ class EmpleadosController {
                                     'id_empleado' => $empleadoModel->ultimoIdInsertado()
                                 ),
                                 'msg' => array(
-                                    'Se registro el empleado correctamente'
+                                    'Se registró el empleado correctamente'
                                 )
                             );
                         }
@@ -96,7 +100,6 @@ class EmpleadosController {
                 'success' => false,
                 'msg' => array(
                     'Ocurrio un error en el servidor, intentelo más tarde',
-                    ''. $guardoDetalle,
                     $ex->getMessage()
                 )
             );
@@ -121,6 +124,56 @@ class EmpleadosController {
                     'msg' => 'No se pudo eliminar el empleado'
                 );
             }
+        } catch (Exception $ex){
+            $respuesta = array(
+                'success' => false,
+                'msg' => array(
+                    'Ocurrio un error en el servidor, intentar mas tarde',
+                    $ex->getMessage()
+                )
+            );
+        }
+        return $respuesta;
+    }
+
+    public function obtenerMoneda() {
+        try {
+            $url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF343410/datos/oportuno';
+            $token = 'b1f35fb18770e6b7d3f9dedfedf8d38a96f3224a8533934ad87623a1826c7b1f';
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Bmx-Token: ' . $token,
+                'Accept: application/json'
+            ));
+
+            $response = curl_exec($ch);
+
+            $data = json_decode($response, true);
+
+            if ($data !== null && isset($data['bmx']['series'][0]['datos'][0]['dato'])) {
+                $tipo_cambio = $data['bmx']['series'][0]['datos'][0]['dato'];
+
+                $respuesta = array(
+                    'success' => true,
+                    'data' =>  $tipo_cambio,
+                    'msg' => array(
+                        'Se obtuvo el cambio de moneda correctamente'
+                    )
+                );
+            } else {
+                $respuesta = array(
+                    'success' => false,
+                    'msg' => array(
+                        'Error al obtener el tipo de cambio'
+                    )
+                );
+            }
+
+            curl_close($ch);
+
         } catch (Exception $ex){
             $respuesta = array(
                 'success' => false,

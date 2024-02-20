@@ -48,7 +48,7 @@
                         </div>
                     </div>
                     
-                    <div class="field">
+                    <div class="field" id="campoActivoInactivo">
                         <label class="label">Activo/Inactivo</label>
                         <div class="control">
                             <div class="select">
@@ -64,7 +64,7 @@
                     <div class="field">
                         <label class="label">Sueldo Base</label>
                         <div class="control">
-                            <input class="input" type="text" id="inputSueldo" name="sueldo_base">
+                            <input class="input" type="number" id="inputSueldo" name="sueldo_base">
                         </div>
                     </div>
 
@@ -84,7 +84,9 @@
 
                     <div class="field is-grouped">
                         <div class="control">
-                            <button type="button" id="btnGuardarEmpleado" class="button is-link">Registrar</button>
+                            <button type="button" id="btnGuardarEmpleado" class="button is-link">
+                                <span id="tituloBtnFormEmpleado"></span>
+                            </button>
                         </div>
                         <div class="control">
                             <button type="button" id="btnCancelarEmpleado" class="button is-link is-light">Cancelar</button>

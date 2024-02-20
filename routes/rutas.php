@@ -24,6 +24,10 @@ if(isset($_GET['peticion']) && $_GET['peticion'] != '' && isset($_GET['funcion']
                     $resultado = $empleadoController->eliminarEmpleado($data);
                     echo json_encode($resultado);
                     break;
+                case 'banxico':
+                    $resultado = $empleadoController->obtenerMoneda();
+                    echo json_encode($resultado);
+                    break;
                 default:
                     http_response_code(404);
                     echo json_encode(array(

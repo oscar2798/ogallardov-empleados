@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/bulma.min.css">
     <link rel="stylesheet" href="assets/css/estilos.css" type="css">
     <script src="https://kit.fontawesome.com/fa2f67eb8b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <?php include_once("./views/nav-bar.php"); ?>

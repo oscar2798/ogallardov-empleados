@@ -5,10 +5,6 @@ class ValidarFormulario{
     public static function validarFormEmpleado($paramsForm){
         $validacion['status'] = true;
         $validacion['msg'] = array();
-        if(!isset($paramsForm['id_empleado'])){
-            $validacion['status'] = false;
-            $validacion['msg'][] = 'El identificador del empleado es requerido';
-        }
         if(!isset($paramsForm['clave_empleado']) || $paramsForm['clave_empleado'] == ''){
             $validacion['status'] = false;
             $validacion['msg'][] = 'La clave del empleado es requerido';

@@ -17,7 +17,7 @@ class DataBase {
 
     public function obtenerLista($tabla) {
 
-        $consulta = "SELECT * FROM ".$tabla;
+        $consulta = "SELECT * FROM ".$tabla." WHERE activo=1";
 
         $sql = $this->ejecutarConsulta($consulta);
 

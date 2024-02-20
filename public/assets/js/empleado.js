@@ -4,9 +4,11 @@ $(document).ready(function () {
 
     $(document).on('click','#btnAgregarEmpleado',function(){
         $('#contenedorFormEmpleado').fadeIn();
+        $('#campoActivoInactivo').fadeOut();
         $('#tablaEmpleados').fadeOut();
         
         $('#tituloFormEmpleado').html('Agregar empleado');
+        $('#tituloBtnFormEmpleado').html('Registrar');
         $('#formEmpleado')[0].reset();
         $('#inputIdEmpleado').val(0);
     });
@@ -37,10 +39,31 @@ $(document).ready(function () {
         $('#inputDetalleEdad').val(empleado.edad);
         $('#inputDetalleFecha').val(empleado.fecha_nacimiento);
         $('#inputDetalleGenero').val(empleado.genero);
-        $('#inputDetalleSueldo').val(empleado.sueldo_base);
+        $('#inputDetalleSueldo').val(Number(empleado.sueldo_base).toLocaleString('en-US'));
         $('#inputDetalleActivoInactivo').val((empleado.activo == 1 ? 'Activo' : 'Inactivo'));
-        $('#inputDetallePuesto').val(empleado.detalle.puesto);
-        $('#inputDetalleExperiencia').val(empleado.detalle.experiencia_profesional);
+        $('#inputDetallePuesto').val(empleado.detalle?.puesto);
+        $('#inputDetalleExperiencia').val(empleado.detalle?.experiencia_profesional);
+     
+        var aumento = Number(empleado.sueldo_base) * 0.04;
+        var primeros4meses = Number(empleado.sueldo_base) + aumento;
+
+        var primeros8meses = primeros4meses + aumento;
+
+        var primeros12meses = primeros8meses + aumento;
+
+        var primeros16meses = primeros12meses + aumento;
+
+        var primeros18meses = primeros16meses + aumento;
+
+        var dataAumentoPesos = [
+            Number(primeros4meses.toFixed(2)), 
+            Number(primeros8meses.toFixed(2)), 
+            Number(primeros12meses.toFixed(2)), 
+            Number(primeros16meses.toFixed(2)),
+            Number(primeros18meses.toFixed(2))
+        ];
+
+        Empleados.apiBanxico(dataAumentoPesos);
 
     });
 
@@ -50,6 +73,7 @@ $(document).ready(function () {
         $('#tablaEmpleados').fadeOut();
        
         $('#tituloFormEmpleado').html('Modificar empleado');
+        $('#tituloBtnFormEmpleado').html('Actualizar');
         var empleado = JSON.parse(atob(botonModificar.data('str_empleado_obj')));
 
         $('#inputIdEmpleado').val(empleado.id_empleado);
@@ -60,8 +84,8 @@ $(document).ready(function () {
         $('#inputGenero').val(empleado.genero);
         $('#inputSueldo').val(empleado.sueldo_base);
         $('#inputActivoInactivo').val(empleado.activo);
-        $('#inputPuesto').val(empleado.detalle.puesto);
-        $('#inputExperiencia').val(empleado.detalle.experiencia_profesional);
+        $('#inputPuesto').val(empleado.detalle?.puesto);
+        $('#inputExperiencia').val(empleado.detalle?.experiencia_profesional);
     });
 
     $(document).on('click','.btnEliminarEmpleado',function(){
@@ -88,6 +112,9 @@ $(document).ready(function () {
 
 });
 
+var graficaPesos;
+var graficaDolares;
+
 var Empleados = {
 
     listaEmpleados : function(){
@@ -102,12 +129,12 @@ var Empleados = {
                     var html_registros_empleados = '';
                     respuestaAjax.data.empleados.forEach(function(empleado){
                         var strEmpleadoObj = btoa(JSON.stringify(empleado));
-
+                        var fecha_nacimiento = new Date(empleado.fecha_nacimiento).toLocaleDateString();
                         html_registros_empleados += '<tr>' +
                                 '<td>'+empleado.clave_empleado+'</td>' +
                                 '<td>'+empleado.nombre+'</td>' +
                                 '<td>'+empleado.edad+'</td>' +
-                                '<td>'+empleado.fecha_nacimiento+'</td>' +
+                                '<td>'+fecha_nacimiento+'</td>' +
                                 '<td>'+(empleado.activo == true ? 'Activo' : 'Inactivo') +'</td>' +
                                 '<td>'+
                                     '<button class="button is-info js-modal-trigger btnVerDetalleEmpleado" ' +
@@ -142,6 +169,7 @@ var Empleados = {
                 if(respuestaAjax.success) {
                     $('#contenedorFormEmpleado').fadeOut();
                     $('#tablaEmpleados').fadeIn();
+                    Empleados.alertaExito(respuestaAjax.msg);
                     Empleados.listaEmpleados();
                 }else{
                     var html_mensajes = '';
@@ -155,6 +183,7 @@ var Empleados = {
                     });
                 }
             },error : function (err){
+                console.log(err);
                 Empleados.alertaError("Error en la petición de guardar empleado");
             }
         });
@@ -191,10 +220,120 @@ var Empleados = {
         });
     },
 
+    apiBanxico(datosGraficaPesos) {
+        $.ajax({
+            type : 'POST',
+            url : host_backend+'peticion=empleados&funcion=banxico',
+            data : {},
+            dataType : 'json',
+            success : function (respuestaAjax){
+                if(respuestaAjax.success) {
+
+                     // 1 dolar a pesos = 17.0419
+                     // 1 peso a dolar = 0.059
+
+                    var dolarPeso = respuestaAjax.data;
+
+                    var datosAumentoDolares = [];
+
+                    datosGraficaPesos.forEach(salario => {
+
+                        var pesoDolar = salario / Number(dolarPeso);
+
+                        datosAumentoDolares.push(pesoDolar)
+                    });
+
+                    Empleados.graficaProyeccionPesos(datosGraficaPesos);
+
+                    Empleados.graficaProyeccionDolares(datosAumentoDolares);
+
+                }else{
+                    var html_mensajes = '';
+                    respuestaAjax.msg.forEach(function(mensaje){
+                        html_mensajes += '<li>'+mensaje+'</li>';
+                    });
+                    $('#divMensajesSistema').html(html_mensajes).fadeIn();
+                    setTimeout(function(){
+                        $('#divMensajesSistema').html('').fadeOut();
+                    },10000);
+                }
+                
+            },error : function (err){
+                console.log(err);
+                Empleados.alertaError('Error en la petición de eliminar empleado');
+            }
+        });
+    },
+
+    graficaProyeccionPesos(dataAumento) {
+        const ctx = document.getElementById('graficaPesos').getContext("2d");
+
+        if (graficaPesos) {
+            grafica.destroy();
+        }
+
+        graficaPesos = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['4 Meses', '8 Meses', '12 Meses', '16 Meses', '18 Meses'],
+                datasets: [
+                    {
+                        label: 'Total MXN',
+                        data: dataAumento,
+                        borderWidth: 1,
+                        backgroundColor: [
+                           '#ff6384',
+                            '#36a2eb',
+                            '#cc65fe',
+                            '#ffce56'
+                        ]
+                    },
+                ]
+            },
+            
+        });
+    },
+
+    graficaProyeccionDolares(dataAumento) {
+        const ctx = document.getElementById('graficaDolares').getContext("2d");
+
+        if (graficaDolares) {
+            grafica.destroy();
+        }
+
+        graficaDolares = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['4 Meses', '8 Meses', '12 Meses', '16 Meses', '18 Meses'],
+                datasets: [
+                    {
+                        label: 'Total USD',
+                        data: dataAumento,
+                        borderWidth: 1,
+                        backgroundColor: [
+                           '#ff6384',
+                            '#36a2eb',
+                            '#cc65fe',
+                            '#ffce56'
+                        ]
+                    },
+                ]
+            },
+            
+        });
+    },
+
     alertaError: function(mensaje) {
         Swal.fire({
             title: mensaje,
             icon: "error"
+        });
+    },
+
+    alertaExito: function(mensaje) {
+        Swal.fire({
+            title: mensaje,
+            icon: "success"
         });
     }
     
